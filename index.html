@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1a1a1a">
+<title>Vertigo · Autobelays</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --card: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --line: #e5e3dc;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, system-ui, "SF Pro Text", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased; }
+  body { padding: 16px 14px 80px; max-width: 560px; margin: 0 auto; }
+  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  .total { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted);
+    margin-bottom: 16px; padding: 10px 12px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 34px; height: 34px; border-radius: 6px; flex: 0 0 34px;
+    background: #3b82f6; color: white; font-weight: 700; font-size: 12px;
+    display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .legend-swatch .grade { font-size: 13px; position: relative; z-index: 2; }
+  .legend-swatch.projecting .badge-p-mini {
+    position: absolute; top: -4px; right: -4px;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: #fff; color: #1a1a1a;
+    font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3); z-index: 3;
+  }
+  .legend-swatch.complete { box-shadow: inset 0 0 0 3px #16a34a; }
+  .legend-swatch.complete::before { content: ""; position: absolute; inset: 0;
+    background: rgba(255,255,255,0.62); z-index: 1; }
+  .legend-swatch.complete .grade { opacity: 0.55; }
+  .legend-swatch.complete .check { position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center; z-index: 3; }
+  .legend-swatch.complete .check svg { width: 60%; height: 60%; color: #16a34a;
+    filter: drop-shadow(0 1px 2px rgba(22,163,74,0.4)); }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px;
+    margin-bottom: 12px; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+  .card-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .card-meta { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .card-progress { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+  .routes { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; }
+  .route {
+    position: relative; overflow: hidden;
+    aspect-ratio: 1 / 1; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 17px;
+    cursor: pointer; user-select: none;
+    transition: box-shadow 160ms ease, transform 80ms ease;
+  }
+  .route:active { transform: scale(0.94); }
+  .route .grade { line-height: 1; position: relative; z-index: 2; }
+  .route.white-hold { box-shadow: inset 0 0 0 1.5px rgba(0,0,0,0.18); }
+
+  /* PROJECTING — small white-circle "P" badge */
+  .badge-p {
+    position: absolute; top: 5px; right: 5px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #1a1a1a;
+    font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    z-index: 3;
+  }
+
+  /* COMPLETE — fade tile, green dominates */
+  .route.complete::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit;
+    background: rgba(255, 255, 255, 0.62); /* fades original colour */
+    z-index: 1;
+  }
+  .route.complete .grade {
+    opacity: 0.55;
+  }
+  .route.complete .check {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .route.complete .check svg {
+    width: 60%; height: 60%;
+    color: #16a34a;
+    filter: drop-shadow(0 2px 3px rgba(22, 163, 74, 0.4));
+  }
+  .route.complete {
+    box-shadow: inset 0 0 0 3px #16a34a;
+  }
+  @media (prefers-color-scheme: dark) {
+    .route.complete::before { background: rgba(0, 0, 0, 0.45); }
+  }
+
+  /* ---- Picker modal ---- */
+  .picker { position: fixed; inset: 0; z-index: 100; display: none; }
+  .picker.open { display: flex; align-items: flex-end; justify-content: center; }
+  .picker-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+    animation: fade 140ms ease; }
+  .picker-sheet { position: relative; width: 100%; max-width: 460px;
+    background: var(--card); border-radius: 18px 18px 0 0;
+    padding: 18px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.2);
+    animation: slideUp 200ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .picker-grip { width: 36px; height: 4px; background: var(--line); border-radius: 99px;
+    margin: 0 auto 14px; }
+  .picker-title { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 14px; }
+  .picker-title strong { color: var(--ink); font-weight: 600; }
+  .picker-actions { display: flex; flex-direction: column; gap: 8px; }
+  .state-btn { display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 12px; border: 1.5px solid var(--line);
+    background: var(--card); color: var(--ink);
+    font-size: 16px; font-weight: 600; font-family: inherit;
+    cursor: pointer; text-align: left; }
+  .state-btn:active { transform: scale(0.98); }
+  .state-btn .dot { width: 18px; height: 18px; border-radius: 50%; flex: 0 0 18px;
+    display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; }
+  .state-btn[data-state="untried"]    .dot { background: #d4d4d0; }
+  .state-btn[data-state="projecting"] .dot { background: #f59e0b; }
+  .state-btn[data-state="complete"]   .dot { background: #16a34a; }
+  .state-btn.current { border-color: var(--ink); background: var(--bg); }
+  .state-btn .current-mark { margin-left: auto; color: var(--muted); font-size: 13px; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  footer { text-align: center; color: var(--muted); font-size: 11px; margin-top: 22px; }
+  .reset-link { color: var(--muted); text-decoration: underline; cursor: pointer; background: none;
+    border: none; font-size: 11px; font-family: inherit; padding: 4px 8px; }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111111; --card: #1c1c1c; --ink: #f5f5f0;
+      --muted: #9a9a9a; --line: #2a2a2a;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Vertigo · Autobelays</h1>
+  <div class="total" id="total">0 / 0 sent</div>
+</header>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-swatch untried"><span class="grade">6</span></div>untried
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch projecting"><span class="grade">6</span><span class="badge-p-mini">P</span></div>projecting
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch complete"><span class="grade">6</span><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span></div>complete
+  </div>
+</div>
+
+<div id="app"></div>
+
+<div class="picker" id="picker" aria-hidden="true">
+  <div class="picker-backdrop" onclick="closePicker()"></div>
+  <div class="picker-sheet">
+    <div class="picker-grip"></div>
+    <div class="picker-title" id="pickerTitle"></div>
+    <div class="picker-actions" id="pickerActions"></div>
+  </div>
+</div>
+
+<footer>
+  Tap a route to set its status.<br>
+  <button class="reset-link" onclick="resetAll()">reset all ticks</button>
+</footer>
+
+<script>
+  // ============================================================
+  // COLOR PALETTE — climbing hold colours
+  // ============================================================
+  const COLORS = {
+    white:      { bg: "#f8f8f5", fg: "#1a1a1a", needsBorder: true, label: "white" },
+    yellow:     { bg: "#fde047", fg: "#1a1a1a", label: "yellow" },
+    orange:     { bg: "#f97316", fg: "#ffffff", label: "orange" },
+    darkorange: { bg: "#c2410c", fg: "#ffffff", label: "dark orange" },
+    red:        { bg: "#e11d48", fg: "#ffffff", label: "red" },
+    darkred:    { bg: "#7f1d1d", fg: "#ffffff", label: "dark red" },
+    pink:       { bg: "#ec4899", fg: "#ffffff", label: "pink" },
+    blue:       { bg: "#3b82f6", fg: "#ffffff", label: "blue" },
+    green:      { bg: "#15803d", fg: "#ffffff", label: "green" }, // forest, distinct from state green
+    purple:     { bg: "#9333ea", fg: "#ffffff", label: "purple" },
+    black:      { bg: "#1a1a1a", fg: "#ffffff", label: "black" },
+    gray:       { bg: "#6b7280", fg: "#ffffff", label: "gray" }
+  };
+
+  // ============================================================
+  // DATA — edit this section when routes are reset.
+  // Route IDs are stable: do NOT renumber existing routes.
+  // When an autobelay is reset, REMOVE its old route IDs and
+  // ADD new IDs continuing from the highest existing ID.
+  // ============================================================
+  const NEXT_ID_HINT = 40; // next ID to use when adding new routes
+  const AUTOBELAYS = [
+    { n: 1, setDate: "2026-04-28", routes: [
+      { id: 1, color: "blue",   grade: "5"  },
+      { id: 2, color: "red",    grade: "6-" },
+      { id: 3, color: "yellow", grade: "4+" },
+      { id: 4, color: "green",  grade: "6"  },
+      { id: 5, color: "purple", grade: "6+" },
+      { id: 6, color: "black",  grade: "7-" }
+    ]},
+    { n: 2, setDate: "2026-05-05", routes: [
+      { id: 7,  color: "white",  grade: "4"  },
+      { id: 8,  color: "orange", grade: "5+" },
+      { id: 9,  color: "pink",   grade: "6-" },
+      { id: 10, color: "blue",   grade: "6"  },
+      { id: 11, color: "red",    grade: "7"  }
+    ]},
+    { n: 3, setDate: "2026-02-24", routes: [
+      { id: 12, color: "yellow", grade: "5"  },
+      { id: 13, color: "green",  grade: "5+" },
+      { id: 14, color: "purple", grade: "6"  },
+      { id: 15, color: "black",  grade: "6+" },
+      { id: 16, color: "white",  grade: "5"  }
+    ]},
+    { n: 4, setDate: "2026-04-14", routes: [
+      { id: 17, color: "black",      grade: "5"     },
+      { id: 18, color: "darkorange", grade: "6+/7-" },
+      { id: 19, color: "white",      grade: "7"     },
+      { id: 20, color: "blue",       grade: "7-"    },
+      { id: 21, color: "darkred",    grade: "7+"    },
+      { id: 22, color: "green",      grade: "5+"    }
+    ]},
+    { n: 5, setDate: "2026-04-21", routes: [
+      { id: 23, color: "purple", grade: "4+" },
+      { id: 24, color: "black",  grade: "5"  },
+      { id: 25, color: "white",  grade: "5"  },
+      { id: 26, color: "orange", grade: "5+" },
+      { id: 27, color: "pink",   grade: "6-" },
+      { id: 28, color: "blue",   grade: "6"  },
+      { id: 29, color: "red",    grade: "7-" }
+    ]},
+    { n: 6, setDate: "2026-03-13", routes: [
+      { id: 30, color: "yellow", grade: "4"  },
+      { id: 31, color: "green",  grade: "5-" },
+      { id: 32, color: "purple", grade: "5"  },
+      { id: 33, color: "black",  grade: "6-" },
+      { id: 34, color: "white",  grade: "6+" }
+    ]},
+    { n: 7, setDate: null, routes: [
+      { id: 35, color: "orange", grade: "4+" },
+      { id: 36, color: "pink",   grade: "5"  },
+      { id: 37, color: "blue",   grade: "5+" },
+      { id: 38, color: "red",    grade: "6"  },
+      { id: 39, color: "yellow", grade: "6+" }
+    ]}
+  ];
+
+  // ============================================================
+  // STATE — localStorage on this device.
+  // ============================================================
+  const STORAGE_KEY = "vertigo_samo_state_v1";
+  const STATES = ["untried", "projecting", "complete"];
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch { return {}; }
+  }
+  function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+  function getRouteState(state, id) { return state[id] || "untried"; }
+  function setRouteState(id, newState) {
+    const s = loadState();
+    if (newState === "untried") delete s[id]; else s[id] = newState;
+    saveState(s);
+    closePicker();
+    render();
+  }
+  function resetAll() {
+    if (!confirm("Reset all ticks on this device?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    render();
+  }
+
+  // ============================================================
+  // PICKER — bottom-sheet modal for state selection
+  // ============================================================
+  function findRouteContext(id) {
+    for (const ab of AUTOBELAYS) {
+      const r = ab.routes.find(x => x.id === id);
+      if (r) return { ab, r };
+    }
+    return null;
+  }
+  function openPicker(id) {
+    const ctx = findRouteContext(id);
+    if (!ctx) return;
+    const cur = getRouteState(loadState(), id);
+    const c = COLORS[ctx.r.color] || COLORS.gray;
+    document.getElementById("pickerTitle").innerHTML =
+      `Autobelay ${ctx.ab.n} · <strong>${c.label} ${ctx.r.grade}</strong>`;
+    const labels = { untried: "Untried", projecting: "Projecting", complete: "Complete" };
+    document.getElementById("pickerActions").innerHTML = STATES.map(s => `
+      <button class="state-btn ${s === cur ? "current" : ""}" data-state="${s}"
+              onclick="setRouteState(${id}, '${s}')">
+        <span class="dot">${s === "complete" ? "✓" : s === "projecting" ? "P" : ""}</span>
+        <span>${labels[s]}</span>
+        ${s === cur ? '<span class="current-mark">current</span>' : ""}
+      </button>
+    `).join("");
+    const picker = document.getElementById("picker");
+    picker.classList.add("open");
+    picker.setAttribute("aria-hidden", "false");
+  }
+  function closePicker() {
+    const picker = document.getElementById("picker");
+    picker.classList.remove("open");
+    picker.setAttribute("aria-hidden", "true");
+  }
+  // Close picker on Escape key
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closePicker(); });
+
+  // ============================================================
+  // GRADE SORTING — UIAA: 4 < 4+ < 5- < 5 < 5+ < 6- < 6 < 6+ < 7- < 7 < 7+ ...
+  // ============================================================
+  function gradeValue(g) {
+    if (!g) return 0;
+    // For ranges like "6+/7-", sort by the harder (right-hand) value.
+    const part = String(g).includes("/") ? String(g).split("/")[1] : String(g);
+    const m = part.match(/^(\d+)([+-]?)$/);
+    if (!m) return 0;
+    const base = parseInt(m[1], 10) * 10;
+    const mod = m[2] === "+" ? 3 : m[2] === "-" ? -3 : 0;
+    return base + mod;
+  }
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+  function daysSince(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    return Math.round((today - d) / (1000 * 60 * 60 * 24));
+  }
+  function fmtDate(iso) {
+    if (!iso) return "date unknown";
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  }
+  function render() {
+    const state = loadState();
+    const app = document.getElementById("app");
+    let totalSent = 0, totalRoutes = 0;
+    app.innerHTML = AUTOBELAYS.map(ab => {
+      const sentHere = ab.routes.filter(r => getRouteState(state, r.id) === "complete").length;
+      totalSent += sentHere; totalRoutes += ab.routes.length;
+      const ds = daysSince(ab.setDate);
+      const dateLabel = ab.setDate
+        ? `set ${fmtDate(ab.setDate)} · ${ds}d ago`
+        : "set date unknown";
+      const sorted = [...ab.routes].sort((a, b) => gradeValue(a.grade) - gradeValue(b.grade));
+      const cells = sorted.map(r => {
+        const st = getRouteState(state, r.id);
+        const c = COLORS[r.color] || COLORS.gray;
+        const style = `background:${c.bg};color:${c.fg};`;
+        const cls = ["route", st, c.needsBorder ? "white-hold" : ""].filter(Boolean).join(" ");
+        const checkIcon = st === "complete"
+          ? `<span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>`
+          : "";
+        const pBadge = st === "projecting" ? `<span class="badge-p">P</span>` : "";
+        return `<div class="${cls}" style="${style}" onclick="openPicker(${r.id})">
+          <span class="grade">${r.grade}</span>${checkIcon}${pBadge}
+        </div>`;
+      }).join("");
+      return `<section class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Autobelay ${ab.n}</div>
+            <div class="card-progress">${sentHere} / ${ab.routes.length} sent</div>
+          </div>
+          <div class="card-meta">${dateLabel}</div>
+        </div>
+        <div class="routes">${cells}</div>
+      </section>`;
+    }).join("");
+    document.getElementById("total").textContent = `${totalSent} / ${totalRoutes} sent`;
+  }
+  render();
+</script>
+</body>
+</html>
