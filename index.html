@@ -214,14 +214,15 @@
   // When an autobelay is reset, REMOVE its old route IDs and
   // ADD new IDs continuing from the highest existing ID.
   // ============================================================
-  const NEXT_ID_HINT = 76; // next ID to use when adding new routes
+  const NEXT_ID_HINT = 93; // next ID to use when adding new routes
   const AUTOBELAYS = [
     { n: 1, setDate: "2026-04-28", routes: [
       { id: 40, color: "gray",   grade: "4+"    },
       { id: 41, color: "green",  grade: "6-"    },
       { id: 42, color: "yellow", grade: "7-"    },
       { id: 43, color: "orange", grade: "6+/7-" },
-      { id: 44, color: "blue",   grade: "7-/7"  }
+      { id: 44, color: "blue",   grade: "7-/7"  },
+      { id: 76, color: "black",  grade: "7/7+"  }
     ]},
     { n: 2, setDate: "2026-05-05", routes: [
       { id: 45, color: "pink",      grade: "4+"    },
@@ -229,14 +230,16 @@
       { id: 47, color: "yellow",    grade: "6"     },
       { id: 48, color: "green",     grade: "6-"    },
       { id: 49, color: "black",     grade: "6+/7-" },
-      { id: 50, color: "palegreen", grade: "7+/8-" }
+      { id: 50, color: "palegreen", grade: "7+/8-" },
+      { id: 77, color: "white",     grade: "7+"    }
     ]},
     { n: 3, setDate: "2026-02-24", routes: [
-      { id: 51, color: "darkblue", grade: "6"  },
-      { id: 52, color: "yellow",   grade: "7+" },
-      { id: 53, color: "red",      grade: "6-" },
-      { id: 54, color: "gray",     grade: "5-" },
-      { id: 55, color: "green",    grade: "6"  }
+      { id: 51, color: "darkblue",  grade: "6"  },
+      { id: 52, color: "yellow",    grade: "7+" },
+      { id: 53, color: "red",       grade: "6-" },
+      { id: 54, color: "gray",      grade: "5-" },
+      { id: 55, color: "green",     grade: "6"  },
+      { id: 78, color: "palegreen", grade: "7-" }
     ]},
     { n: 4, setDate: "2026-04-14", routes: [
       { id: 17, color: "black",      grade: "5"     },
@@ -271,6 +274,24 @@
       { id: 73, color: "yellow",    grade: "7-"  },
       { id: 74, color: "white",     grade: "8"   },
       { id: 75, color: "palegreen", grade: "8a+" }
+    ]},
+    { n: 8, setDate: null, routes: [
+      { id: 79, color: "yellow",    grade: "6"     },
+      { id: 80, color: "white",     grade: "6+"    },
+      { id: 81, color: "black",     grade: "7-"    },
+      { id: 82, color: "palegreen", grade: "7+/8-" },
+      { id: 83, color: "pink",      grade: "7"     },
+      { id: 84, color: "green",     grade: "5-"    },
+      { id: 85, color: "blue",      grade: "7/7+"  }
+    ]},
+    { n: 9, setDate: null, routes: [
+      { id: 86, color: "neonyellow", grade: "6+"    },
+      { id: 87, color: "white",      grade: "5-"    },
+      { id: 88, color: "green",      grade: "7/7+"  },
+      { id: 89, color: "orange",     grade: "6"     },
+      { id: 90, color: "blue",       grade: "6+"    },
+      { id: 91, color: "palegreen",  grade: "7+/8-" },
+      { id: 92, color: "black",      grade: "7-/7"  }
     ]}
   ];
 
