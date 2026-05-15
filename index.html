@@ -191,18 +191,21 @@
   // COLOR PALETTE — climbing hold colours
   // ============================================================
   const COLORS = {
-    white:      { bg: "#f8f8f5", fg: "#1a1a1a", needsBorder: true, label: "white" },
-    yellow:     { bg: "#fde047", fg: "#1a1a1a", label: "yellow" },
-    orange:     { bg: "#f97316", fg: "#ffffff", label: "orange" },
-    darkorange: { bg: "#c2410c", fg: "#ffffff", label: "dark orange" },
-    red:        { bg: "#e11d48", fg: "#ffffff", label: "red" },
-    darkred:    { bg: "#7f1d1d", fg: "#ffffff", label: "dark red" },
-    pink:       { bg: "#ec4899", fg: "#ffffff", label: "pink" },
-    blue:       { bg: "#3b82f6", fg: "#ffffff", label: "blue" },
-    green:      { bg: "#15803d", fg: "#ffffff", label: "green" }, // forest, distinct from state green
-    purple:     { bg: "#9333ea", fg: "#ffffff", label: "purple" },
-    black:      { bg: "#1a1a1a", fg: "#ffffff", label: "black" },
-    gray:       { bg: "#6b7280", fg: "#ffffff", label: "gray" }
+    white:       { bg: "#f8f8f5", fg: "#1a1a1a", needsBorder: true, label: "white" },
+    yellow:      { bg: "#fde047", fg: "#1a1a1a", label: "yellow" },
+    neonyellow:  { bg: "#d4ff00", fg: "#1a1a1a", label: "neon yellow" },
+    orange:      { bg: "#f97316", fg: "#ffffff", label: "orange" },
+    darkorange:  { bg: "#c2410c", fg: "#ffffff", label: "dark orange" },
+    red:         { bg: "#e11d48", fg: "#ffffff", label: "red" },
+    darkred:     { bg: "#7f1d1d", fg: "#ffffff", label: "dark red" },
+    pink:        { bg: "#ec4899", fg: "#ffffff", label: "pink" },
+    blue:        { bg: "#3b82f6", fg: "#ffffff", label: "blue" },
+    darkblue:    { bg: "#1e3a8a", fg: "#ffffff", label: "dark blue" },
+    green:       { bg: "#15803d", fg: "#ffffff", label: "green" }, // forest, distinct from state green
+    palegreen:   { bg: "#bbf7d0", fg: "#1a1a1a", label: "pale green" },
+    purple:      { bg: "#9333ea", fg: "#ffffff", label: "purple" },
+    black:       { bg: "#1a1a1a", fg: "#ffffff", label: "black" },
+    gray:        { bg: "#6b7280", fg: "#ffffff", label: "gray" }
   };
 
   // ============================================================
@@ -211,29 +214,29 @@
   // When an autobelay is reset, REMOVE its old route IDs and
   // ADD new IDs continuing from the highest existing ID.
   // ============================================================
-  const NEXT_ID_HINT = 40; // next ID to use when adding new routes
+  const NEXT_ID_HINT = 76; // next ID to use when adding new routes
   const AUTOBELAYS = [
     { n: 1, setDate: "2026-04-28", routes: [
-      { id: 1, color: "blue",   grade: "5"  },
-      { id: 2, color: "red",    grade: "6-" },
-      { id: 3, color: "yellow", grade: "4+" },
-      { id: 4, color: "green",  grade: "6"  },
-      { id: 5, color: "purple", grade: "6+" },
-      { id: 6, color: "black",  grade: "7-" }
+      { id: 40, color: "gray",   grade: "4+"    },
+      { id: 41, color: "green",  grade: "6-"    },
+      { id: 42, color: "yellow", grade: "7-"    },
+      { id: 43, color: "orange", grade: "6+/7-" },
+      { id: 44, color: "blue",   grade: "7-/7"  }
     ]},
     { n: 2, setDate: "2026-05-05", routes: [
-      { id: 7,  color: "white",  grade: "4"  },
-      { id: 8,  color: "orange", grade: "5+" },
-      { id: 9,  color: "pink",   grade: "6-" },
-      { id: 10, color: "blue",   grade: "6"  },
-      { id: 11, color: "red",    grade: "7"  }
+      { id: 45, color: "pink",      grade: "4+"    },
+      { id: 46, color: "blue",      grade: "6"     },
+      { id: 47, color: "yellow",    grade: "6"     },
+      { id: 48, color: "green",     grade: "6-"    },
+      { id: 49, color: "black",     grade: "6+/7-" },
+      { id: 50, color: "palegreen", grade: "7+/8-" }
     ]},
     { n: 3, setDate: "2026-02-24", routes: [
-      { id: 12, color: "yellow", grade: "5"  },
-      { id: 13, color: "green",  grade: "5+" },
-      { id: 14, color: "purple", grade: "6"  },
-      { id: 15, color: "black",  grade: "6+" },
-      { id: 16, color: "white",  grade: "5"  }
+      { id: 51, color: "darkblue", grade: "6"  },
+      { id: 52, color: "yellow",   grade: "7+" },
+      { id: 53, color: "red",      grade: "6-" },
+      { id: 54, color: "gray",     grade: "5-" },
+      { id: 55, color: "green",    grade: "6"  }
     ]},
     { n: 4, setDate: "2026-04-14", routes: [
       { id: 17, color: "black",      grade: "5"     },
@@ -244,27 +247,30 @@
       { id: 22, color: "green",      grade: "5+"    }
     ]},
     { n: 5, setDate: "2026-04-21", routes: [
-      { id: 23, color: "purple", grade: "4+" },
-      { id: 24, color: "black",  grade: "5"  },
-      { id: 25, color: "white",  grade: "5"  },
-      { id: 26, color: "orange", grade: "5+" },
-      { id: 27, color: "pink",   grade: "6-" },
-      { id: 28, color: "blue",   grade: "6"  },
-      { id: 29, color: "red",    grade: "7-" }
+      { id: 56, color: "neonyellow", grade: "5"     },
+      { id: 57, color: "blue",       grade: "6"     },
+      { id: 58, color: "green",      grade: "7-/7"  },
+      { id: 59, color: "white",      grade: "7"     },
+      { id: 60, color: "orange",     grade: "7"     },
+      { id: 61, color: "black",      grade: "6+/7-" },
+      { id: 62, color: "palegreen",  grade: "7+"    }
     ]},
     { n: 6, setDate: "2026-03-13", routes: [
-      { id: 30, color: "yellow", grade: "4"  },
-      { id: 31, color: "green",  grade: "5-" },
-      { id: 32, color: "purple", grade: "5"  },
-      { id: 33, color: "black",  grade: "6-" },
-      { id: 34, color: "white",  grade: "6+" }
+      { id: 63, color: "blue",      grade: "5+"   },
+      { id: 64, color: "palegreen", grade: "6-"   },
+      { id: 65, color: "green",     grade: "6"    },
+      { id: 66, color: "red",       grade: "7"    },
+      { id: 67, color: "white",     grade: "7"    },
+      { id: 68, color: "yellow",    grade: "7/7+" },
+      { id: 69, color: "black",     grade: "7+"   }
     ]},
     { n: 7, setDate: null, routes: [
-      { id: 35, color: "orange", grade: "4+" },
-      { id: 36, color: "pink",   grade: "5"  },
-      { id: 37, color: "blue",   grade: "5+" },
-      { id: 38, color: "red",    grade: "6"  },
-      { id: 39, color: "yellow", grade: "6+" }
+      { id: 70, color: "red",       grade: "6-"  },
+      { id: 71, color: "darkblue",  grade: "5+"  },
+      { id: 72, color: "black",     grade: "6"   },
+      { id: 73, color: "yellow",    grade: "7-"  },
+      { id: 74, color: "white",     grade: "8"   },
+      { id: 75, color: "palegreen", grade: "8a+" }
     ]}
   ];
 
@@ -338,11 +344,25 @@
     if (!g) return 0;
     // For ranges like "6+/7-", sort by the harder (right-hand) value.
     const part = String(g).includes("/") ? String(g).split("/")[1] : String(g);
-    const m = part.match(/^(\d+)([+-]?)$/);
-    if (!m) return 0;
-    const base = parseInt(m[1], 10) * 10;
-    const mod = m[2] === "+" ? 3 : m[2] === "-" ? -3 : 0;
-    return base + mod;
+
+    // French sport grade (e.g. 8a+): bumped above UIAA so it always sorts last.
+    const french = part.match(/^(\d+)([abc])([+-]?)$/i);
+    if (french) {
+      const base = parseInt(french[1], 10) * 10;
+      const letter = { a: 0, b: 3, c: 6 }[french[2].toLowerCase()];
+      const mod = french[3] === "+" ? 1 : 0;
+      return 100 + base + letter + mod;
+    }
+
+    // UIAA grade (e.g. 7-, 7, 7+)
+    const uiaa = part.match(/^(\d+)([+-]?)$/);
+    if (uiaa) {
+      const base = parseInt(uiaa[1], 10) * 10;
+      const mod = uiaa[2] === "+" ? 3 : uiaa[2] === "-" ? -3 : 0;
+      return base + mod;
+    }
+
+    return 0;
   }
 
   // ============================================================
